@@ -23,8 +23,6 @@ HarmideAudioProcessor::HarmideAudioProcessor()
                        )
 #endif
 {
-    synth.addSound(new SynthSound());
-    synth.addVoice(new SynthVoice());
 }
 
 HarmideAudioProcessor::~HarmideAudioProcessor()
@@ -71,8 +69,7 @@ double HarmideAudioProcessor::getTailLengthSeconds() const
 
 int HarmideAudioProcessor::getNumPrograms()
 {
-    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
-                // so this should be at least 1, even if you're not really implementing programs.
+    return 1;
 }
 
 int HarmideAudioProcessor::getCurrentProgram()
@@ -101,6 +98,16 @@ void HarmideAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBloc
     message << " samplesPerBlock = " << samplesPerBlock << "\n";
     message << " sampleRate = " << sampleRate << "\n";
     juce::Logger::getCurrentLogger()->writeToLog(message);
+    synth.setCurrentPlaybackSampleRate(sampleRate);
+    juce::dsp::ProcessSpec spec;
+    spec.maximumBlockSize = samplesPerBlock;
+    spec.sampleRate = sampleRate;
+    spec.numChannels = getNumOutputChannels();
+
+    synth.addSound(new SynthSound());
+    for (int i = 0; i < 8; i++) {
+        synth.addVoice(new SynthVoice(spec));
+    }
 }
 
 void HarmideAudioProcessor::releaseResources()
@@ -114,15 +121,9 @@ bool HarmideAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) 
     juce::ignoreUnused (layouts);
     return true;
   #else
-    // This is the place where you check if the layout is supported.
-    // In this template code we only support mono or stereo.
-    // Some plugin hosts, such as certain GarageBand versions, will only
-    // load plugins that support stereo bus layouts.
     if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
      && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
-
-    // This checks if the input layout matches the output layout
    #if ! JucePlugin_IsSynth
     if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
         return false;
@@ -136,12 +137,9 @@ bool HarmideAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) 
 void HarmideAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
-    buffer.clear();
-    /*
-    auto* leftBuf = buffer.getWritePointer(0);
-    auto* rightBuf = buffer.getWritePointer(1);
     auto totalSamps = buffer.getNumSamples(); 
-    */
+
+    synth.renderNextBlock(buffer, midiMessages, 0, totalSamps);
 }
 
 //==============================================================================

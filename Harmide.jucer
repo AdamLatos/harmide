@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="vAaFbv" name="Harmide" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
-              pluginFormats="buildStandalone,buildVST3" pluginCharacteristicsValue="pluginProducesMidiOut,pluginWantsMidiIn">
+              pluginFormats="buildStandalone,buildVST3" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn">
   <MAINGROUP id="F8ZxxI" name="Harmide">
     <GROUP id="{9CC7A163-7553-104E-E0BE-7F4AD486D91F}" name="Source">
       <FILE id="W2iZhM" name="PluginProcessor.cpp" compile="1" resource="0"
