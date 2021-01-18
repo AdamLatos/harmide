@@ -8,12 +8,12 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "SineWaveOscillator.h"
+#include "Synth.h"
 
 //==============================================================================
 HarmideAudioProcessor::HarmideAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (BusesProperties()
+      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
                        .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
@@ -23,6 +23,8 @@ HarmideAudioProcessor::HarmideAudioProcessor()
                        )
 #endif
 {
+    synth.addSound(new SynthSound());
+    synth.addVoice(new SynthVoice());
 }
 
 HarmideAudioProcessor::~HarmideAudioProcessor()
@@ -98,16 +100,11 @@ void HarmideAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBloc
     message << "Preparing plugin\n";
     message << " samplesPerBlock = " << samplesPerBlock << "\n";
     message << " sampleRate = " << sampleRate << "\n";
-    currentSampleRate = sampleRate;
-    updateAngleDelta();
     juce::Logger::getCurrentLogger()->writeToLog(message);
-
-    synthAudioSource.prepareToPlay(samplesPerBlock, sampleRate);
 }
 
 void HarmideAudioProcessor::releaseResources()
 {
-    synthAudioSource.releaseResources();
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -139,63 +136,18 @@ bool HarmideAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) 
 void HarmideAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
+    buffer.clear();
+    /*
     auto* leftBuf = buffer.getWritePointer(0);
     auto* rightBuf = buffer.getWritePointer(1);
-    auto totalSamps = buffer.getNumSamples();
-
-    auto pluginVolumeLocal = pluginVolume;
-    auto levelScale = pluginVolume * 2.0f;
-
-    //juce::MidiBuffer processedMidi;
-    //int time;
-    //juce::MidiMessage m;
-
-    //for (juce::MidiBuffer::Iterator i (midiMessages); i.getNextEvent(m, time);) {
-    //    if (m.isNoteOn()) {
-    //        juce::uint8 newVel = noteOnVel;
-    //        m = juce::MidiMessage::noteOn(m.getChannel(), m.getNoteNumber(), newVel);
-    //    }
-    //    
-    //    processedMidi.addEvent(m, time);
-    //}
-    //midiMessages.swapWith(processedMidi);
-
-    auto sinLevel = 0.125f;
-    
-    if (pluginVolumeNow == pluginVolumeLocal) {
-        auto levelScale = pluginVolume * 2.0f;
-
-        for (auto s = 0; s < totalSamps; s++) {
-            leftBuf[s] = random.nextFloat() * levelScale - pluginVolumeLocal;
-            rightBuf[s] = random.nextFloat() * levelScale - pluginVolumeLocal;
-
-            auto currentSample = (float)std::sin(currentAngle);
-            currentAngle += angleDelta;
-            leftBuf[s] += currentSample * sinLevel;
-            rightBuf[s] += currentSample * sinLevel;
-        }
-    }
-    else {
-        auto levelIncrement = (pluginVolumeLocal - pluginVolumeNow) / totalSamps;
-        auto scaleIncrement = levelIncrement + levelIncrement;
-        for (auto s = 0; s < totalSamps; s++) {
-            pluginVolumeNow += levelIncrement;
-            levelScale += scaleIncrement;
-            leftBuf[s] = random.nextFloat() * levelScale - pluginVolumeNow;
-            rightBuf[s] = random.nextFloat() * levelScale - pluginVolumeNow;
-
-            auto currentSample = (float)std::sin(currentAngle);
-            currentAngle += angleDelta;
-            leftBuf[s] += currentSample * sinLevel;
-            rightBuf[s] += currentSample * sinLevel;
-        }
-    }
+    auto totalSamps = buffer.getNumSamples(); 
+    */
 }
 
 //==============================================================================
 bool HarmideAudioProcessor::hasEditor() const
 {
-    return true; // (change this to false if you choose to not supply an editor)
+    return true;
 }
 
 juce::AudioProcessorEditor* HarmideAudioProcessor::createEditor()
@@ -222,9 +174,4 @@ void HarmideAudioProcessor::setStateInformation (const void* data, int sizeInByt
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new HarmideAudioProcessor();
-}
-
-void HarmideAudioProcessor::updateAngleDelta() {
-    auto cyclesPerSample = frequency / currentSampleRate;
-    angleDelta = cyclesPerSample * juce::MathConstants<double>::twoPi;
 }

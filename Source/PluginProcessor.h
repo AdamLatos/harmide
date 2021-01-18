@@ -9,6 +9,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "Synth.h"
 
 //==============================================================================
 /**
@@ -16,17 +17,6 @@
 class HarmideAudioProcessor  : public juce::AudioProcessor
 {
 public:
-
-    float pluginVolumeNow = 0.2;
-    float pluginVolume = 0.2;
-    juce::Random random;
-
-    double currentSampleRate;
-    double currentAngle = 0.0;
-    double angleDelta = 0.0;
-    float frequency = 261.625f;
-
-    void updateAngleDelta();
 
     //==============================================================================
     HarmideAudioProcessor();
@@ -66,6 +56,7 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
 private:
+    juce::Synthesiser synth;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HarmideAudioProcessor)
 };

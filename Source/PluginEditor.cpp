@@ -41,7 +41,7 @@ void HarmideAudioProcessorEditor::paint (juce::Graphics& g)
     g.fillAll (juce::Colours::darkslateblue);
     g.setColour (juce::Colours::palegreen);
     g.setFont (juce::Font(15.0, juce::Font::bold));
-    g.drawFittedText("Midi Volume", 0, 0, getWidth(), 30, juce::Justification::centred, 1);
+    g.drawFittedText("Gain", 0, 0, getWidth(), 30, juce::Justification::centred, 1);
 }
 
 void HarmideAudioProcessorEditor::resized()
@@ -52,6 +52,5 @@ void HarmideAudioProcessorEditor::resized()
 }
 
 void HarmideAudioProcessorEditor::sliderValueChanged(juce::Slider* slider) {
-    if (slider == &pluginVolumeSlider)
-        audioProcessor.pluginVolume = pluginVolumeSlider.getValue();
+    if (slider == &pluginVolumeSlider) {}
 }
